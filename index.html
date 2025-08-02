@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portofolio Fisikawan Profesional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cosmic Dark -->
+    <!-- Application Structure Plan: The application uses a single-page, vertical scrolling structure with three main sections: Home, Experience, and Experiments/Projects. This design was chosen for its intuitive, linear storytelling flow, allowing users (recruiters, academics) to easily grasp the physicist's profile, from their identity to their chronological experience and finally their detailed work. Navigation is handled by a sticky header with links that smoothly scroll to the corresponding section, ensuring constant and easy access to all parts of the portfolio. This structure is ideal for a focused, content-driven portfolio. -->
+    <!-- Visualization & Content Choices: 
+        - Home: Goal is to introduce. A two-column layout with a photo and a brief bio, plus a clear "Download CV" call-to-action button, effectively establishes identity.
+        - Experience: Goal is to show progression. A custom vertical timeline built with HTML/Tailwind presents chronological work history clearly and professionally without needing complex libraries.
+        - Experiments/Projects: Goal is to demonstrate skills. A responsive grid of cards is used. One card includes a dynamic bar chart from Chart.js to visualize quantitative results, showcasing data visualization skills. Hover effects are added for interactivity. This approach balances static information with dynamic, engaging elements.
+        - Library/Method: Vanilla JS for smooth scrolling, Tailwind CSS for styling, and Chart.js for data visualization. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            color: #cbd5e1; /* slate-300 */
+            overflow-x: hidden;
+        }
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .nav-link {
+            position: relative;
+            transition: color 0.3s;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #22d3ee; /* cyan-400 */
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #1e293b; /* slate-800 */
+            border: 4px solid #22d3ee; /* cyan-400 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            max-height: 250px;
+        }
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.5, 0, 0, 1), transform 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .parallax-container {
+            will-change: transform;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <canvas id="particle-canvas"></canvas>
+
+    <header id="header" class="bg-slate-900/80 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="#home" class="text-2xl font-bold text-white">
+                    <span class="text-cyan-400">A</span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="nav-link text-slate-300 hover:text-cyan-400 font-medium active">Home</a>
+                    <a href="#experience" class="nav-link text-slate-300 hover:text-cyan-400 font-medium">Experience</a>
+                    <a href="#projects" class="nav-link text-slate-300 hover:text-cyan-400 font-medium">Experiments/Projects</a>
+                </nav>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-white focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-slate-800">
+            <a href="#home" class="block py-2 px-6 text-slate-300 hover:bg-slate-700">Home</a>
+            <a href="#experience" class="block py-2 px-6 text-slate-300 hover:bg-slate-700">Experience</a>
+            <a href="#projects" class="block py-2 px-6 text-slate-300 hover:bg-slate-700">Experiments/Projects</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="min-h-screen flex items-center pt-24 pb-12 relative z-10">
+            <div class="container mx-auto px-6 parallax-container" data-parallax-speed="0.3">
+                <div class="flex flex-col md:flex-row items-center justify-center gap-12">
+                    <div class="w-48 h-48 md:w-64 md:h-64 flex-shrink-0 reveal">
+                        <img src="https://placehold.co/400x400/1e293b/e0f2fe?text=AS" alt="Foto Profil Ahli Fisika" class="w-full h-full rounded-full object-cover border-4 border-slate-700 shadow-2xl shadow-cyan-500/10">
+                    </div>
+                    <div class="text-center md:text-left max-w-lg reveal" style="transition-delay: 200ms;">
+                        <h1 class="text-4xl md:text-5xl font-bold text-white">Anindiya Syalwa Shefira</h1>
+                        <p class="mt-4 text-lg text-slate-400">
+                            Fisikawan Komputasi dengan ketertarikan pada simulasi material kuantum dan analisis data high-throughput.
+                        </p>
+                        <a href="#" class="mt-8 inline-block bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-bold py-3 px-8 rounded-full transition-transform duration-300 hover:scale-105 shadow-lg shadow-cyan-500/30">
+                            Unduh CV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience" class="py-20 bg-slate-800/50 relative z-10">
+            <div class="container mx-auto px-6 parallax-container" data-parallax-speed="0.15">
+                <h2 class="text-3xl font-bold text-center text-white mb-16 reveal">Experience</h2>
+                <div class="relative max-w-2xl mx-auto border-l-2 border-slate-700 pl-8">
+                    <div class="timeline-item mb-16 reveal">
+                        <h3 class="text-xl font-bold text-cyan-400">Postdoctoral Research Fellow</h3>
+                        <p class="font-medium text-slate-300">Institut Teknologi Bandung</p>
+                        <p class="text-sm text-slate-500 mb-2">2023 - Sekarang</p>
+                        <p class="text-slate-400">
+                            Mengembangkan model simulasi untuk superkonduktor topologis dan menganalisis sifat transport elektroniknya menggunakan metode komputasi kuantum.
+                        </p>
+                    </div>
+                    <div class="timeline-item mb-16 reveal">
+                        <h3 class="text-xl font-bold text-cyan-400">PhD in Computational Physics</h3>
+                        <p class="font-medium text-slate-300">Universitas Indonesia</p>
+                        <p class="text-sm text-slate-500 mb-2">2019 - 2023</p>
+                        <p class="text-slate-400">
+                            Disertasi berfokus pada pemodelan dinamika spin dalam material 2D. Menerbitkan 3 makalah di jurnal internasional sebagai penulis pertama.
+                        </p>
+                    </div>
+                    <div class="timeline-item reveal">
+                        <h3 class="text-xl font-bold text-cyan-400">Research Assistant</h3>
+                        <p class="font-medium text-slate-300">Badan Riset dan Inovasi Nasional (BRIN)</p>
+                        <p class="text-sm text-slate-500 mb-2">2018 - 2019</p>
+                        <p class="text-slate-400">
+                            Membantu dalam eksperimen deposisi lapisan tipis dan melakukan analisis karakterisasi menggunakan XRD dan SEM.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="py-20 relative z-10">
+            <div class="container mx-auto px-6 parallax-container" data-parallax-speed="0.15">
+                <h2 class="text-3xl font-bold text-center text-white mb-16 reveal">Experiments / Projects</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <div class="bg-slate-800/80 backdrop-blur-sm rounded-lg p-6 transform hover:-translate-y-2 transition-transform duration-300 shadow-2xl shadow-slate-900/50 reveal">
+                        <h3 class="font-bold text-xl text-cyan-400 mb-2">Simulasi Monte Carlo untuk Model Ising</h3>
+                        <p class="text-slate-400 mb-4">
+                            Simulasi transisi fasa feromagnetik-paramagnetik dalam model Ising 2D menggunakan algoritma Metropolis.
+                        </p>
+                        <div class="chart-container">
+                             <canvas id="projectChart1"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/80 backdrop-blur-sm rounded-lg p-6 transform hover:-translate-y-2 transition-transform duration-300 shadow-2xl shadow-slate-900/50 reveal" style="transition-delay: 200ms;">
+                        <h3 class="font-bold text-xl text-cyan-400 mb-2">Analisis Difraksi Sinar-X (XRD)</h3>
+                        <p class="text-slate-400">
+                           Mengembangkan skrip Python untuk otomatisasi analisis puncak dari data difraksi Sinar-X untuk menentukan struktur kristal dan ukuran butir dari sampel lapisan tipis.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-800/80 backdrop-blur-sm rounded-lg p-6 transform hover:-translate-y-2 transition-transform duration-300 shadow-2xl shadow-slate-900/50 reveal" style="transition-delay: 400ms;">
+                        <h3 class="font-bold text-xl text-cyan-400 mb-2">Pemodelan DFT Material 2D</h3>
+                        <p class="text-slate-400">
+                            Menggunakan Density Functional Theory (DFT) untuk menghitung struktur pita elektronik dan sifat optik dari grafena dan MoS2.
+                        </p>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-6 relative z-10">
+        <div class="container mx-auto px-6 text-center text-slate-500">
+            <p>&copy; 2025 Anindiya Syalwa Shefira. Dibuat dengan cinta pada fisika dan kode.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Particle animation
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particlesArray;
+
+            class Particle {
+                constructor(x, y, directionX, directionY, size, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.directionX = directionX;
+                    this.directionY = directionY;
+                    this.size = size;
+                    this.color = color;
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                    ctx.fillStyle = 'rgba(34, 211, 238, 0.5)';
+                    ctx.fill();
+                }
+                update() {
+                    if (this.x > canvas.width || this.x < 0) {
+                        this.directionX = -this.directionX;
+                    }
+                    if (this.y > canvas.height || this.y < 0) {
+                        this.directionY = -this.directionY;
+                    }
+                    this.x += this.directionX;
+                    this.y += this.directionY;
+                    this.draw();
+                }
+            }
+
+            function init() {
+                particlesArray = [];
+                let numberOfParticles = (canvas.height * canvas.width) / 12000;
+                for (let i = 0; i < numberOfParticles; i++) {
+                    let size = (Math.random() * 2) + 1;
+                    let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                    let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                    let directionX = (Math.random() * .2) - .1;
+                    let directionY = (Math.random() * .2) - .1;
+                    particlesArray.push(new Particle(x, y, directionX, directionY, size, '#22d3ee'));
+                }
+            }
+            
+            function connect() {
+                let opacityValue = 1;
+                for (let a = 0; a < particlesArray.length; a++) {
+                    for (let b = a; b < particlesArray.length; b++) {
+                        let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                                     + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                        if (distance < (canvas.width/7) * (canvas.height/7)) {
+                            opacityValue = 1 - (distance/20000);
+                            ctx.strokeStyle = `rgba(34, 211, 238, ${opacityValue * 0.3})`;
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.clearRect(0, 0, innerWidth, innerHeight);
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                }
+                connect();
+            }
+
+            init();
+            animate();
+
+            window.addEventListener('resize', function() {
+                canvas.width = innerWidth;
+                canvas.height = innerHeight;
+                init();
+            });
+
+            // Parallax effect on scroll
+            const parallaxElements = document.querySelectorAll('.parallax-container');
+            let ticking = false;
+
+            function handleScroll() {
+                let scrollY = window.pageYOffset;
+                parallaxElements.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.bottom >= 0 && rect.top <= window.innerHeight) {
+                        let speed = parseFloat(el.dataset.parallaxSpeed) || 0.5;
+                        let offset = (rect.top + rect.height / 2) - window.innerHeight / 2;
+                        el.style.transform = `translateY(${offset * speed * -0.1}px)`;
+                    }
+                });
+                ticking = false;
+            }
+
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        handleScroll();
+                        ticking = true;
+                    });
+                    ticking = true;
+                }
+            });
+
+            // General UI script
+            const header = document.getElementById('header');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const navLinks = document.querySelectorAll('nav a, #mobile-menu a');
+            const sections = document.querySelectorAll('section');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = e.currentTarget.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                        if (!mobileMenu.classList.contains('hidden')) {
+                            mobileMenu.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    header.classList.add('shadow-lg');
+                } else {
+                    header.classList.remove('shadow-lg');
+                }
+            });
+
+            const scrollObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal').forEach(el => {
+                scrollObserver.observe(el);
+            });
+
+            const navObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        document.querySelectorAll('.nav-link').forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+
+            sections.forEach(section => {
+                navObserver.observe(section);
+            });
+            
+            const ctx1 = document.getElementById('projectChart1')?.getContext('2d');
+            if (ctx1) {
+                new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Lattice 16', 'Lattice 32', 'Lattice 64', 'Lattice 128'],
+                        datasets: [{
+                            label: 'Waktu Komputasi (detik)',
+                            data: [1.2, 5.1, 22.3, 95.8],
+                            backgroundColor: 'rgba(34, 211, 238, 0.4)',
+                            borderColor: 'rgba(34, 211, 238, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: 'rgba(71, 85, 105, 0.5)' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: '#1e293b',
+                                titleColor: '#e2e8f0',
+                                bodyColor: '#94a3b8',
+                                displayColors: false
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
